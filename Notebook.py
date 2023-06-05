@@ -103,7 +103,7 @@ class Notebook(UserDict):
             out += '| {:^20} | {:^50} |\n'.format('Теги', 'Зміст')
             for page in self.iterator(1):
                 out += '-' * 77 + '\n'
-                out += ' {:^77} \n'.format(f"Нотатка #{page_num}")
+                out += ' {:^77} \n'.format(f"Запис #{page_num}")
                 out += '-' * 77 + '\n'
                 for record in page:
                     out += '| {:^20} | {:^50} |\n'.format(', '.join(record[0]),
@@ -152,7 +152,10 @@ result_search = notebook.search_in_content(search_string)
 
 i = 1
 for match in result_search:
-    print(f"#{i} : {match}")
+    for tags, notes in notebook.data.items():
+        for note in notes:
+            if note == match:
+                print(f"#{i} : {', #'.join(tags)} | {match}")
     i += 1
 
 selected_note_index = int(input('Виберіть індекс нотатки для зміни: '))

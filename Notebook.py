@@ -115,6 +115,9 @@ class Notebook(UserDict):
         return out
 
 
+
+
+
 notebook = Notebook()
 
 # Додавання нотаток до словника
@@ -144,7 +147,7 @@ print(notebook)
 '''Пошук за змістом та зміна нотатки'''
 
 print('\nВивід пошуку за змістом')
-search_string = input('Введіть рядок для пошуку :')
+search_string = input('Введіть рядок для пошуку (/all щоб показати всі): ')
 result_search = notebook.search_in_content(search_string)
 
 i = 1

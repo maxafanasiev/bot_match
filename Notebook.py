@@ -5,10 +5,11 @@ from collections import UserDict
 class Note:
     def __init__(self, content: str):
         self.content = ''
-        if len(content) <= 80:
+        limit = 80
+        if len(content) <= limit:
             self.content = content
         else:
-            raise ValueError('Note too long.')
+            raise ValueError(f'Нотатка довша {limit} символів.')
         self.creation_date = datetime.datetime.now()
 
     def __eq__(self, other_note):
@@ -31,7 +32,6 @@ class Notebook(UserDict):
         else:
             self.data[tuple(tags)].append(note)
 
-
     def __getitem__(self, tags):
         matching_notes = []
         for note_tags, notes in self.data.items():
@@ -44,11 +44,37 @@ class Notebook(UserDict):
 
         return matching_notes
 
-    def search_in_content(self, search_string):
+    def edit_note(self, old_note: Note, new_note: Note):
+        for note_list in self.data.values():
+            if old_note in note_list:
+                index = note_list.index(old_note)
+                note_list[index] = new_note
+                break
+        else:
+            raise ValueError('Нотатка не знайдена.')
+
+    def clean_dict_keys(self, ):
+        for key in self.data.keys():
+            if not self.data[key]:
+                self.data.pop(key)
+                break
+
+    def delete_note(self, old_note: Note):
+        for note_list in self.data.values():
+            if old_note in note_list:
+                note_list.remove(old_note)
+                self.clean_dict_keys()
+                break
+        else:
+            raise ValueError('Нотатка не знайдена.')
+
+    def search_in_content(self, search_string='/all'):
         matching_notes = []
         for note_list in self.data.values():
             for note in note_list:
-                if search_string.lower() in note.content.lower():
+                if search_string.lower() == '/all':
+                    matching_notes.append(note)
+                elif search_string.lower() in note.content.lower():
                     matching_notes.append(note)
         return matching_notes
 
@@ -74,17 +100,17 @@ class Notebook(UserDict):
         out = ''
         if self.keys():
             out += '-' * 77 + '\n'
-            out += '| {:^20} | {:^50} |\n'.format('Tags', 'Note')
+            out += '| {:^20} | {:^50} |\n'.format('Теги', 'Зміст')
             for page in self.iterator(1):
                 out += '-' * 77 + '\n'
-                out += ' {:^77} \n'.format(f"Note #{page_num}")
+                out += ' {:^77} \n'.format(f"Нотатка #{page_num}")
                 out += '-' * 77 + '\n'
                 for record in page:
                     out += '| {:^20} | {:^50} |\n'.format(', '.join(record[0]),
                                                           ', '.join([note.content for note in (record[1])]))
                 page_num += 1
         else:
-            out += '| {:^77} |\n'.format('Notebook is empty.')
+            out += '| {:^77} |\n'.format('Нотатник пустий.')
         out += '-' * 77 + '\n'
         return out
 
@@ -104,20 +130,51 @@ notebook[['tag3', 'tag4']] = note4
 #
 
 
-print('\n Друк пошуку за тегами')
-result = notebook[['tag2']]
-result1 = notebook[['tag3']]
-result2 = notebook[['tag4']]
-print(result)
-print(result1)
-print(result2)
+# print('\n Друк пошуку за тегами')
+# result = notebook[['tag2']]
+# result1 = notebook[['tag3']]
+# result2 = notebook[['tag4']]
+# print(result)
+# print(result1)
+# print(result2)
 
+
+print(notebook)
+
+'''Пошук за змістом та зміна нотатки'''
 
 print('\nВивід пошуку за змістом')
-result_search = notebook.search_in_content('Content')
-print(result_search)
+search_string = input('Введіть рядок для пошуку :')
+result_search = notebook.search_in_content(search_string)
 
+i = 1
+for match in result_search:
+    print(f"#{i} : {match}")
+    i += 1
 
+selected_note_index = int(input('Виберіть індекс нотатки для зміни: '))
+inp = input('Що зробити з нотаткою? (edit, delete). ')
 
-print('\n Друк Notebook')
+if inp == 'edit':
+    # Вибір конкретної нотатки для зміни
+    if 0 < selected_note_index < len(result_search)+1:
+        selected_note = result_search[selected_note_index-1]
+        new_content = input('Введіть новий вміст нотатки: ')
+        new_note = Note(new_content)
+        notebook.edit_note(selected_note, new_note)
+        print('Нотатку успішно змінено.')
+    else:
+        print('Неправильний індекс нотатки.')
+
+elif inp == 'delete':
+    # Вибір конкретної нотатки для видалення
+    if 0 < selected_note_index < len(result_search) + 1:
+        selected_note = result_search[selected_note_index - 1]
+        notebook.delete_note(selected_note)
+        print('Нотатку успішно видалено.')
+    else:
+        print('Неправильний індекс нотатки.')
+
+    print('\n Друк Notebook')
+
 print(notebook)

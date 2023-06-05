@@ -150,13 +150,11 @@ print('\nВивід пошуку за змістом')
 search_string = input('Введіть рядок для пошуку (/all щоб показати всі): ')
 result_search = notebook.search_in_content(search_string)
 
-i = 1
-for match in result_search:
+for index, match in enumerate(result_search,1):
     for tags, notes in notebook.data.items():
         for note in notes:
             if note == match:
-                print(f"#{i} : {', #'.join(tags)} | {match}")
-    i += 1
+                print(f"#{index} : {', #'.join(tags)} | {match}")
 
 selected_note_index = int(input('Виберіть індекс нотатки для зміни: '))
 inp = input('Що зробити з нотаткою? (edit, delete). ')
